@@ -33,6 +33,18 @@
                     <li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
                     <li><a asp-area="" asp-controller="Home" asp-action="About">About</a></li>
                     <li><a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">Settings<span class="caret"></span></a>
+                        <ul class="dropdown-menu multi-level">
+                            <li class="dropdown-submenu">
+                                <a class="dropdown-toggle" data-toggle="dropdown" href="#">Select your language (@ViewBag.Language)<span class="caret"></span></a>
+                                <ul class="dropdown-menu">
+                                    <li @(ViewBag.Language == "EN" ? "active" : "")><a asp-controller="Home" asp-action="SetCulture" asp-route-culture="EN">English</a></li>
+                                    <li @(ViewBag.Language == "FR" ? "active" : "")><a asp-controller="Home" asp-action="SetCulture" asp-route-culture="FR">French</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -67,5 +79,9 @@
     </environment>
 
     @RenderSection("Scripts", required: false)
+    <environment include="Development">
+        <script src="~/app/js/scripts1.js"></script>
+        <script src="~/app/js/scripts2.js"></script>
+    </environment>
 </body>
 </html>

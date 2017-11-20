@@ -10,16 +10,52 @@ using TicTacToe.Services;
 using TicTacToe.Extensions;
 using Microsoft.AspNetCore.Routing;
 using TicTacToe.Models;
+using System.Globalization;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Mvc.Razor;
+using Microsoft.Extensions.Configuration;
+using TicTacToe.Options;
 
 namespace TicTacToe
 {
     public class Startup
     {
-        public void ConfigureServices(IServiceCollection services)
+        public IConfiguration _configuration { get; }
+        public IHostingEnvironment _hostingEnvironment { get; }
+        public Startup(IConfiguration configuration, IHostingEnvironment hostingEnvironment)
         {
-            services.AddMvc();
+            _configuration = configuration;
+            _hostingEnvironment = hostingEnvironment;
+        }
+
+        public void ConfigureCommonServices(IServiceCollection services)
+        {
+            services.AddLocalization(options => options.ResourcesPath = "Localization");
+            services.AddMvc().AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix, options => options.ResourcesPath = "Localization").AddDataAnnotationsLocalization();
             services.AddSingleton<IUserService, UserService>();
+            services.AddSingleton<IGameInvitationService, GameInvitationService>();
+            services.Configure<EmailServiceOptions>(_configuration.GetSection("Email"));
+            services.AddEmailService(_hostingEnvironment, _configuration);
             services.AddRouting();
+            services.AddSession(o =>
+            {
+                o.IdleTimeout = TimeSpan.FromMinutes(30);
+            });
+        }
+
+        public void ConfigureDevelopmentServices(IServiceCollection services)
+        {
+            ConfigureCommonServices(services);
+        }
+
+        public void ConfigureStagingServices(IServiceCollection services)
+        {
+            ConfigureCommonServices(services);
+        }
+
+        public void ConfigureProductionServices(IServiceCollection services)
+        {
+            ConfigureCommonServices(services);
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
@@ -35,6 +71,7 @@ namespace TicTacToe
             }
 
             app.UseStaticFiles();
+            app.UseSession();
 
             var routeBuilder = new RouteBuilder(app);
             routeBuilder.MapGet("CreateUser", context =>
@@ -50,7 +87,22 @@ namespace TicTacToe
             var newUserRoutes = routeBuilder.Build();
             app.UseRouter(newUserRoutes);
 
+            app.UseWebSockets();
             app.UseCommunicationMiddleware();
+
+            var supportedCultures = CultureInfo.GetCultures(CultureTypes.AllCultures);
+            var localizationOptions = new RequestLocalizationOptions
+            {
+                DefaultRequestCulture = new RequestCulture("en-US"),
+                SupportedCultures = supportedCultures,
+                SupportedUICultures = supportedCultures
+            };
+
+            localizationOptions.RequestCultureProviders.Clear();
+            localizationOptions.RequestCultureProviders.Add(new CultureProviderResolverService());
+
+            app.UseRequestLocalization(localizationOptions);
+
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
