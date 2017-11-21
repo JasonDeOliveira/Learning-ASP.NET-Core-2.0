@@ -117,7 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Title" xml:space="preserve">
-    <value>Welcome to the Tic-Tac-Toe Game!</value>
+  <data name="DesktopTitle" xml:space="preserve">
+    <value>Welcome to the Tic-Tac-Toe Desktop Game!</value>
+  </data>
+  <data name="MobileTitle" xml:space="preserve">
+    <value>Welcome to the Tic-Tac-Toe Mobile Game!</value>
   </data>
 </root>

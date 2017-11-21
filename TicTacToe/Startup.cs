@@ -15,6 +15,8 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.Extensions.Configuration;
 using TicTacToe.Options;
+using TicTacToe.Filters;
+using TicTacToe.ViewEngines;
 
 namespace TicTacToe
 {
@@ -31,11 +33,17 @@ namespace TicTacToe
         public void ConfigureCommonServices(IServiceCollection services)
         {
             services.AddLocalization(options => options.ResourcesPath = "Localization");
-            services.AddMvc().AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix, options => options.ResourcesPath = "Localization").AddDataAnnotationsLocalization();
+            services.AddMvc(o => o.Filters.Add(typeof(DetectMobileFilter))).AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix, options => options.ResourcesPath = "Localization").AddDataAnnotationsLocalization();
+
             services.AddSingleton<IUserService, UserService>();
             services.AddSingleton<IGameInvitationService, GameInvitationService>();
+            services.AddSingleton<IGameSessionService, GameSessionService>();
+
             services.Configure<EmailServiceOptions>(_configuration.GetSection("Email"));
             services.AddEmailService(_hostingEnvironment, _configuration);
+            services.AddTransient<IEmailTemplateRenderService, EmailTemplateRenderService>();
+            services.AddTransient<EmailViewEngine, EmailViewEngine>();
+
             services.AddRouting();
             services.AddSession(o =>
             {
@@ -105,9 +113,12 @@ namespace TicTacToe
 
             app.UseMvc(routes =>
             {
+                routes.MapRoute(name: "areaRoute",
+                        template: "{area:exists}/{controller=Home}/{action=Index}");
+
                 routes.MapRoute(
-                            name: "default",
-                            template: "{controller=Home}/{action=Index}/{id?}");
+                    name: "default",
+                    template: "{controller=Home}/{action=Index}/{id?}");
             });
 
             app.UseStatusCodePages("text/plain", "HTTP Error - Status Code: {0}");

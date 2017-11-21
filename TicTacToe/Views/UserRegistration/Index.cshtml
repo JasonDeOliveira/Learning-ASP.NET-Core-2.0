@@ -2,7 +2,8 @@
 @{
     ViewData["Title"] = Localizer["Title"];
 }
-<h2>@ViewData["Title"]</h2>
+@section Desktop{<h2>@Localizer["DesktopTitle"]</h2>}
+@section Mobile {<h2>@Localizer["MobileTitle"]</h2>}
 <h4>@Localizer["SubTitle"]</h4>
 <hr />
 <div class="row">

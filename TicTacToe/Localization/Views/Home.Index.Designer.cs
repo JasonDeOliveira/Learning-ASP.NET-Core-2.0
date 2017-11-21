@@ -61,11 +61,20 @@ namespace TicTacToe.Localization.Views {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Welcome to the Tic-Tac-Toe Game!.
+        ///   Looks up a localized string similar to Welcome to the Tic-Tac-Toe Desktop Game!.
         /// </summary>
-        internal static string Title {
+        internal static string DesktopTitle {
             get {
-                return ResourceManager.GetString("Title", resourceCulture);
+                return ResourceManager.GetString("DesktopTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Welcome to the Tic-Tac-Toe Mobile Game!.
+        /// </summary>
+        internal static string MobileTitle {
+            get {
+                return ResourceManager.GetString("MobileTitle", resourceCulture);
             }
         }
     }

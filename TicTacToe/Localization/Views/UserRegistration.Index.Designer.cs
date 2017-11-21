@@ -61,20 +61,29 @@ namespace TicTacToe.Localization.Views {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to User Record.
+        ///   Looks up a localized string similar to User Registration.
         /// </summary>
-        internal static string SubTitle {
+        internal static string DesktopTitle {
             get {
-                return ResourceManager.GetString("SubTitle", resourceCulture);
+                return ResourceManager.GetString("DesktopTitle", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to User Registration.
         /// </summary>
-        internal static string Title {
+        internal static string MobileTitle {
             get {
-                return ResourceManager.GetString("Title", resourceCulture);
+                return ResourceManager.GetString("MobileTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User Record.
+        /// </summary>
+        internal static string SubTitle {
+            get {
+                return ResourceManager.GetString("SubTitle", resourceCulture);
             }
         }
     }
