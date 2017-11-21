@@ -61,7 +61,7 @@ namespace TicTacToe.Localization.Views {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Confirmation de l&apos;enregistrement utilisateur.
+        ///   Looks up a localized string similar to User Registration Confirmation.
         /// </summary>
         internal static string DesktopTitle {
             get {
@@ -70,7 +70,7 @@ namespace TicTacToe.Localization.Views {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Confirmation de l&apos;enregistrement utilisateur.
+        ///   Looks up a localized string similar to User Registration Confirmation.
         /// </summary>
         internal static string MobileTitle {
             get {

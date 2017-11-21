@@ -19,6 +19,8 @@ using TicTacToe.Filters;
 using TicTacToe.ViewEngines;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Halcyon.Web.HAL.Json;
+using TicTacToe.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace TicTacToe
 {
@@ -46,6 +48,17 @@ namespace TicTacToe
             services.AddSingleton<IUserService, UserService>();
             services.AddSingleton<IGameInvitationService, GameInvitationService>();
             services.AddSingleton<IGameSessionService, GameSessionService>();
+
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+            services.AddEntityFrameworkSqlServer()
+                .AddDbContext<GameDbContext>((serviceProvider, options) =>
+                    options.UseSqlServer(connectionString)
+                            .UseInternalServiceProvider(serviceProvider)
+                            );
+
+            var dbContextOptionsbuilder = new DbContextOptionsBuilder<GameDbContext>()
+                .UseSqlServer(connectionString);
+            services.AddSingleton(dbContextOptionsbuilder.Options);
 
             services.Configure<EmailServiceOptions>(_configuration.GetSection("Email"));
             services.AddEmailService(_hostingEnvironment, _configuration);
@@ -130,6 +143,11 @@ namespace TicTacToe
             });
 
             app.UseStatusCodePages("text/plain", "HTTP Error - Status Code: {0}");
+
+            using (var scope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
+            {
+                scope.ServiceProvider.GetRequiredService<GameDbContext>().Database.Migrate();
+            }
         }
     }
 }

@@ -1,44 +1,63 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TicTacToe.Data;
 using TicTacToe.Models;
 
 namespace TicTacToe.Services
 {
     public class UserService : IUserService
     {
-        private static ConcurrentBag<UserModel> _userStore;
-
-        static UserService()
+        private DbContextOptions<GameDbContext> _dbContextOptions;
+        public UserService(DbContextOptions<GameDbContext> dbContextOptions)
         {
-            _userStore = new ConcurrentBag<UserModel>();
+            _dbContextOptions = dbContextOptions;
         }
 
-        public Task<bool> RegisterUser(UserModel userModel)
+        public async Task<bool> RegisterUser(UserModel userModel)
         {
-            _userStore.Add(userModel);
-            return Task.FromResult(true);
+            using (var db = new GameDbContext(_dbContextOptions))
+            {
+                db.UserModels.Add(userModel);
+                await db.SaveChangesAsync();
+                return true;
+            }
         }
 
-        public Task<UserModel> GetUserByEmail(string email)
+        public async Task<UserModel> GetUserByEmail(string email)
         {
-            return Task.FromResult(_userStore.FirstOrDefault(u => u.Email == email));
+            using (var db = new GameDbContext(_dbContextOptions))
+            {
+                return await db.UserModels.FirstOrDefaultAsync(x => x.Email == email);
+            }
         }
 
-        public Task UpdateUser(UserModel userModel)
+        public async Task UpdateUser(UserModel userModel)
         {
-            _userStore = new ConcurrentBag<UserModel>(_userStore.Where(u => u.Email != userModel.Email))
-                {
-                    userModel
-                };
-            return Task.CompletedTask;
+            using (var gameDbContext = new GameDbContext(_dbContextOptions))
+            {
+                gameDbContext.Update(userModel);
+                await gameDbContext.SaveChangesAsync();
+            }
         }
 
-        public Task<IEnumerable<UserModel>> GetTopUsers(int numberOfUsers)
+        public async Task<IEnumerable<UserModel>> GetTopUsers(int numberOfUsers)
         {
-            return Task.Run(() => (IEnumerable<UserModel>)_userStore.OrderBy(x => x.Score).Take(numberOfUsers).ToList());
+            using (var gameDbContext = new GameDbContext(_dbContextOptions))
+            {
+                return await gameDbContext.UserModels.OrderByDescending(x => x.Score).ToListAsync();
+            }
+        }
+
+        public async Task<bool> IsUserExisting(string email)
+        {
+            using (var gameDbContext = new GameDbContext(_dbContextOptions))
+            {
+                return await gameDbContext.UserModels.AnyAsync(user => user.Email == email);
+            }
         }
     }
 }
