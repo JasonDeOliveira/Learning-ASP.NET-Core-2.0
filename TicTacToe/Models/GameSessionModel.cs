@@ -18,5 +18,6 @@ namespace TicTacToe.Models
         public Guid WinnerId { get; set; }
         public Guid ActiveUserId { get; set; }
         public bool TurnFinished { get; set; }
+        public int TurnNumber { get; set; }
     }
 }

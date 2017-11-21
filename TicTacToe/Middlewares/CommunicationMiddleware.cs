@@ -121,24 +121,17 @@ namespace TicTacToe.Middlewares
 
         public async Task ProcessEmailConfirmation(HttpContext context, WebSocket currentSocket, CancellationToken ct, string email)
         {
-            UserModel user = await _userService.GetUserByEmail(email);
+            var user = await _userService.GetUserByEmail(email);
             while (!ct.IsCancellationRequested && !currentSocket.CloseStatus.HasValue && user?.IsEmailConfirmed == false)
             {
-                if (user.IsEmailConfirmed)
-                {
-                    await SendStringAsync(currentSocket, "OK", ct);
-                }
-                else
-                {
-                    user.IsEmailConfirmed = true;
-                    user.EmailConfirmationDate = DateTime.Now;
-
-                    await _userService.UpdateUser(user);
-                    await SendStringAsync(currentSocket, "OK", ct);
-                }
-
-                Task.Delay(500).Wait();
+                await SendStringAsync(currentSocket, "WaitEmailConfirmation", ct);
+                await Task.Delay(500);
                 user = await _userService.GetUserByEmail(email);
+            }
+
+            if (user.IsEmailConfirmed)
+            {
+                await SendStringAsync(currentSocket, "OK", ct);
             }
         }
 
@@ -171,6 +164,13 @@ namespace TicTacToe.Middlewares
             var gameInvitationModel = await gameInvitationService.Get(id);
             while (!ct.IsCancellationRequested && !webSocket.CloseStatus.HasValue && gameInvitationModel?.IsConfirmed == false)
             {
+                await Task.Delay(500);
+                gameInvitationModel = await gameInvitationService.Get(id);
+                await SendStringAsync(webSocket, "WaitForConfirmation", ct);
+            }
+
+            if (gameInvitationModel.IsConfirmed)
+            {
                 await SendStringAsync(webSocket, JsonConvert.SerializeObject(new
                 {
                     Result = "OK",
@@ -178,10 +178,6 @@ namespace TicTacToe.Middlewares
                     gameInvitationModel.EmailTo,
                     gameInvitationModel.Id
                 }), ct);
-
-                Task.Delay(500).Wait();
-
-                gameInvitationModel = await gameInvitationService.Get(id);
             }
         }
     }

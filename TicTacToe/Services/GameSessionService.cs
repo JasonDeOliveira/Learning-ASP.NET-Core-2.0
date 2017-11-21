@@ -45,8 +45,8 @@ namespace TicTacToe.Services
 
         public async Task<GameSessionModel> AddTurn(Guid id, string email, int x, int y)
         {
-            var gameSession = _sessions.FirstOrDefault(session => session.Id == id);
             List<Models.TurnModel> turns;
+            var gameSession = _sessions.FirstOrDefault(session => session.Id == id);
             if (gameSession.Turns != null && gameSession.Turns.Any())
                 turns = new List<Models.TurnModel>(gameSession.Turns);
             else
@@ -56,9 +56,12 @@ namespace TicTacToe.Services
             {
                 User = await _UserService.GetUserByEmail(email),
                 X = x,
-                Y = y
+                Y = y,
+                IconNumber = email == gameSession.User1?.Email ? "1" : "2"
             });
 
+            gameSession.Turns = turns;
+            gameSession.TurnNumber = gameSession.TurnNumber + 1;
             if (gameSession.User1?.Email == email)
                 gameSession.ActiveUser = gameSession.User2;
             else

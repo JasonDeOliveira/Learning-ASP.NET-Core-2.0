@@ -17,22 +17,33 @@ namespace TicTacToe.Services
 
         public Task<GameInvitationModel> Add(GameInvitationModel gameInvitationModel)
         {
-            gameInvitationModel.Id = Guid.NewGuid();
             _gameInvitations.Add(gameInvitationModel);
             return Task.FromResult(gameInvitationModel);
         }
+
         public Task Update(GameInvitationModel gameInvitationModel)
         {
             _gameInvitations = new ConcurrentBag<GameInvitationModel>(_gameInvitations.Where(x => x.Id != gameInvitationModel.Id))
-        {
-            gameInvitationModel
-        };
+            {
+                gameInvitationModel
+            };
             return Task.CompletedTask;
         }
 
         public Task<GameInvitationModel> Get(Guid id)
         {
             return Task.FromResult(_gameInvitations.FirstOrDefault(x => x.Id == id));
+        }
+
+        public Task<IEnumerable<GameInvitationModel>> All()
+        {
+            return Task.FromResult<IEnumerable<GameInvitationModel>>(_gameInvitations.ToList());
+        }
+
+        public Task Delete(Guid id)
+        {
+            _gameInvitations = new ConcurrentBag<GameInvitationModel>(_gameInvitations.Where(x => x.Id != id));
+            return Task.CompletedTask;
         }
     }
 }
