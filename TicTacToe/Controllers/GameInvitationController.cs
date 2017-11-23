@@ -58,16 +58,19 @@ namespace TicTacToe.Controllers
                 }
 
                 var invitation = gameInvitationService.Add(gameInvitationModel).Result;
-                return RedirectToAction("GameInvitationConfirmation", new { id = gameInvitationModel.Id });
+                return RedirectToAction("GameInvitationConfirmation", new { id = invitation.Id });
             }
             return View(gameInvitationModel);
         }
 
         [HttpGet]
-        public IActionResult GameInvitationConfirmation(Guid id, [FromServices]IGameInvitationService gameInvitationService)
+        public async Task<IActionResult> GameInvitationConfirmation(Guid id, [FromServices]IGameInvitationService gameInvitationService)
         {
-            var gameInvitation = gameInvitationService.Get(id).Result;
-            return View(gameInvitation);
+            return await Task.Run(() =>
+            {
+                var gameInvitation = gameInvitationService.Get(id).Result;
+                return View(gameInvitation);
+            });
         }
 
         [HttpGet]
@@ -82,8 +85,12 @@ namespace TicTacToe.Controllers
             {
                 Email = gameInvitation.EmailTo,
                 EmailConfirmationDate = DateTime.Now,
-                IsEmailConfirmed = true
-            });
+                EmailConfirmed = true,
+                FirstName = "",
+                LastName = "",
+                Password = "Azerty123!",
+                UserName = gameInvitation.EmailTo
+            }, true);
             return RedirectToAction("Index", "GameSession", new { id });
         }
     }

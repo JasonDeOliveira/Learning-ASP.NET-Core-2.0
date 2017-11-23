@@ -10,18 +10,18 @@
             <tr style="height:150px;">
                 @for (int columns = 0; columns < 3; columns++)
                 {
-                    <td style="width:150px; border:1px solid #808080" id="@($"c_{rows}_{columns}")">
+                    <td style="width:150px; border:1px solid #808080; text-align:center; vertical-align:middle" id="@($"c_{rows}_{columns}")">
                         @{
                             var position = Model.Turns?.FirstOrDefault(turn => turn.X == columns && turn.Y == rows);
                             if (position != null)
                             {
                                 if (position.User == Model.User1)
                                 {
-                                    <i class="glyphicon glyphicon-unchecked" style="width:100%;height:100%"></i>
+                                    <i class="glyphicon glyphicon-unchecked"></i>
                                 }
                                 else
                                 {
-                                    <i class="glyphicon glyphicon-remove-circle" style="width:100%;height:100%"></i>
+                                    <i class="glyphicon glyphicon-remove-circle"></i>
                                 }
                             }
                             else

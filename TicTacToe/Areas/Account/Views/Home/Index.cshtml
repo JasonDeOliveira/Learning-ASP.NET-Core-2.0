@@ -1,4 +1,11 @@
 ﻿@model TicTacToe.Models.UserModel
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<TicTacToe.Models.UserModel> UserManager
+@{
+    var isTwoFactor = UserManager.GetTwoFactorEnabledAsync(Model).Result;
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
 <h3>Account Details</h3>
 <div class="container">
     <div class="row">
@@ -15,6 +22,21 @@
                         </p>
                         <p>
                             <i class="glyphicon glyphicon-calendar"></i>&nbsp;@Model.EmailConfirmationDate
+                        </p>
+                        <p>
+                            <i class="glyphicon glyphicon-star"></i>&nbsp;@Model.Score
+                        </p>
+                        <p>
+                            <i class="glyphicon glyphicon-check"></i><text>Two Factor Authentication&nbsp;</text>
+                            @if (Model.TwoFactorEnabled)
+                            {
+                                <a asp-action="DisableTwoFactor">Disable</a>
+                            }
+                            else
+                            {
+                                <a asp-action="EnableTwoFactor">Enable</a>
+
+                            }
                         </p>
                     </div>
                 </div>

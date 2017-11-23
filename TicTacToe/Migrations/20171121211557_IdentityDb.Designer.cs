@@ -11,25 +11,15 @@ using TicTacToe.Data;
 namespace TicTacToe.Migrations
 {
     [DbContext(typeof(GameDbContext))]
-    partial class GameDbContextModelSnapshot : ModelSnapshot
+    [Migration("20171121211557_IdentityDb")]
+    partial class IdentityDb
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "2.0.1-rtm-125")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
-                {
-                    b.Property<Guid>("UserId");
-
-                    b.Property<Guid>("RoleId");
-
-                    b.HasKey("UserId", "RoleId");
-
-                    b.ToTable("UserRoleModel");
-                });
 
             modelBuilder.Entity("TicTacToe.Models.GameInvitationModel", b =>
                 {
@@ -125,24 +115,6 @@ namespace TicTacToe.Migrations
                     b.ToTable("TurnModel");
                 });
 
-            modelBuilder.Entity("TicTacToe.Models.TwoFactorCodeModel", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<string>("TokenCode");
-
-                    b.Property<string>("TokenProvider");
-
-                    b.Property<Guid>("UserId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("TwoFactorCodeModel");
-                });
-
             modelBuilder.Entity("TicTacToe.Models.UserModel", b =>
                 {
                     b.Property<Guid>("Id")
@@ -226,14 +198,6 @@ namespace TicTacToe.Migrations
                         .WithMany("Turns")
                         .HasForeignKey("GameSessionModelId");
 
-                    b.HasOne("TicTacToe.Models.UserModel", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("TicTacToe.Models.TwoFactorCodeModel", b =>
-                {
                     b.HasOne("TicTacToe.Models.UserModel", "User")
                         .WithMany()
                         .HasForeignKey("UserId")

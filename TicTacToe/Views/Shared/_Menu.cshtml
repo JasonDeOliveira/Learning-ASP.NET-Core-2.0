@@ -1,7 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Http;
 @{
-    var email = Context.Session.GetString("email");
-    var displayName = Context.Session.GetString("displayName");
+    var email = User?.Identity?.Name ?? Context.Session.GetString("email");
+    var displayName = User.Claims.FirstOrDefault(x => x.Type == "displayName")?.Value ?? Context.Session.GetString("displayName");
 }
 <nav class="navbar navbar-inverse navbar-fixed-top">
     <div class="container">
@@ -37,7 +37,12 @@
                     {
                         Html.RenderPartial("_Account", new TicTacToe.Models.AccountModel { Email = email, DisplayName = displayName });
                     }
+                    else
+                    {
+                        <a asp-area="" asp-controller="Account" asp-action="Login">Login</a>
+                    }
                 </li>
+
             </ul>
         </div>
     </div>

@@ -23,11 +23,17 @@ namespace TicTacToe.Controllers
         public async Task<IActionResult> Index(Guid id)
         {
             var session = await _gameSessionService.GetGameSession(id);
+            var userService = HttpContext.RequestServices.GetService<IUserService>();
+
             if (session == null)
             {
                 var gameInvitationService = Request.HttpContext.RequestServices.GetService<IGameInvitationService>();
                 var invitation = await gameInvitationService.Get(id);
-                session = await _gameSessionService.CreateGameSession(invitation.Id, invitation.InvitedBy, invitation.EmailTo);
+
+                var invitedPlayer = await userService.GetUserByEmail(invitation.EmailTo);
+                var invitedBy = await userService.GetUserByEmail(invitation.InvitedBy);
+
+                session = await _gameSessionService.CreateGameSession(invitation.Id, invitedBy, invitedPlayer);
             }
             return View(session);
         }
@@ -59,7 +65,7 @@ namespace TicTacToe.Controllers
                     if (gameSession.ActiveUser.Email != turn.User.Email)
                         return BadRequest($"{turn.User.Email} cannot play this turn");
 
-                    gameSession = await _gameSessionService.AddTurn(gameSession.Id, turn.User.Email, turn.X, turn.Y);
+                    gameSession = await _gameSessionService.AddTurn(gameSession.Id, turn.User, turn.X, turn.Y);
                     if (gameSession != null && gameSession.ActiveUser.Email != turn.User.Email)
                         return Ok(gameSession);
                     else
@@ -91,7 +97,6 @@ namespace TicTacToe.Controllers
             }
         }
 
-        [Produces("application/json")]
         [HttpGet("/restapi/v1/CheckGameSessionIsFinished/{sessionId}")]
         public async Task<IActionResult> CheckGameSessionIsFinished(Guid sessionId)
         {
@@ -103,16 +108,15 @@ namespace TicTacToe.Controllers
                     if (session.Turns.Count() == 9)
                         return Ok("The game was a draw.");
 
-                    var userTurns = session.Turns.Where(x => x.User == session.User1).ToList();
+                    var userTurns = session.Turns.Where(x => x.User.Id == session.User1.Id).ToList();
                     var user1Won = CheckIfUserHasWon(session.User1?.Email, userTurns);
-
                     if (user1Won)
                     {
                         return Ok($"{session.User1.Email} has won the game.");
                     }
                     else
                     {
-                        userTurns = session.Turns.Where(x => x.User == session.User2).ToList();
+                        userTurns = session.Turns.Where(x => x.User.Id == session.User2.Id).ToList();
                         var user2Won = CheckIfUserHasWon(session.User2?.Email, userTurns);
 
                         if (user2Won)
