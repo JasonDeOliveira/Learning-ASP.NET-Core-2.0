@@ -32,6 +32,11 @@ namespace TicTacToe.Extensions
                             loggingBuilder.AddFile(filePath, (LogLevel)provider.LogLevel);
                             break;
                         }
+                    case "azureappservices":
+                        {
+                            AzureAppServiceDiagnosticExtension.AddAzureWebAppDiagnostics(configuration, loggingBuilder);
+                            break;
+                        }
                     default:
                         {
                             break;

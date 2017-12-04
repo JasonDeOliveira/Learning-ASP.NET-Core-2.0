@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.DataContracts;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -22,11 +24,13 @@ namespace TicTacToe.Services
         private ILogger<UserService> _logger;
         private ApplicationUserManager _userManager;
         private SignInManager<UserModel> _signInManager;
-        public UserService(RoleManager<RoleModel> roleManager, ApplicationUserManager userManager, ILogger<UserService> logger, SignInManager<UserModel> signInManager)
+        private readonly IMonitoringService _telemetryClient;
+        public UserService(RoleManager<RoleModel> roleManager, ApplicationUserManager userManager, ILogger<UserService> logger, SignInManager<UserModel> signInManager, IMonitoringService telemetryClient)
         {
             _userManager = userManager;
             _logger = logger;
             _signInManager = signInManager;
+            _telemetryClient = telemetryClient;
 
             var emailTokenProvider = new EmailTokenProvider<UserModel>();
             _userManager.RegisterTokenProvider("Default", emailTokenProvider);
@@ -110,6 +114,7 @@ namespace TicTacToe.Services
             finally
             {
                 stopwatch.Stop();
+                _telemetryClient.TrackEvent("RegisterUser", stopwatch.Elapsed);
                 _logger.LogTrace($"Start register user {userModel.Email} finished at {DateTime.Now} - elapsed {stopwatch.Elapsed.TotalSeconds} second(s)");
             }
         }

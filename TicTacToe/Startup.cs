@@ -24,6 +24,8 @@ using Microsoft.EntityFrameworkCore;
 using TicTacToe.Managers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using TicTacToe.Monitoring;
+using System.Diagnostics;
 
 namespace TicTacToe
 {
@@ -103,6 +105,21 @@ namespace TicTacToe
                 facebook.ClientId = "123";
                 facebook.ClientSecret = "123";
             });
+
+            services.AddApplicationInsightsTelemetry(_configuration);
+            var section = _configuration.GetSection("Monitoring");
+            var monitoringOptions = new MonitoringOptions();
+            section.Bind(monitoringOptions);
+            services.AddSingleton(monitoringOptions);
+
+            if (monitoringOptions.MonitoringType == "azureapplicationinsights")
+            {
+                services.AddSingleton<IMonitoringService, AzureApplicationInsightsMonitoringService>();
+            }
+            else if (monitoringOptions.MonitoringType == "amazonwebservicescloudwatch")
+            {
+                services.AddSingleton<IMonitoringService, AmazonWebServicesMonitoringService>();
+            }
         }
 
         public void ConfigureDevelopmentServices(IServiceCollection services)
@@ -120,8 +137,11 @@ namespace TicTacToe
             ConfigureCommonServices(services);
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, DiagnosticListener diagnosticListener)
         {
+            var listener = new ApplicationDiagnosticListener();
+            diagnosticListener.SubscribeWithAdapter(listener);
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

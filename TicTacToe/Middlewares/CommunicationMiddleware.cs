@@ -11,21 +11,33 @@ using System.Threading.Tasks;
 using TicTacToe.Models;
 using TicTacToe.Services;
 using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics;
 
 namespace TicTacToe.Middlewares
 {
     public class CommunicationMiddleware
     {
         private readonly RequestDelegate _next;
-        public CommunicationMiddleware(RequestDelegate next)
+        private DiagnosticSource _diagnosticSource;
+        public CommunicationMiddleware(RequestDelegate next, DiagnosticSource diagnosticSource)
         {
             _next = next;
+            _diagnosticSource = diagnosticSource;
         }
 
         public async Task Invoke(HttpContext context)
         {
             if (context.WebSockets.IsWebSocketRequest)
             {
+                if (_diagnosticSource.IsEnabled("TicTacToe.MiddlewareStarting"))
+                {
+                    _diagnosticSource.Write("TicTacToe.MiddlewareStarting",
+                        new
+                        {
+                            httpContext = context
+                        });
+                }
+
                 var webSocket = await context.WebSockets.AcceptWebSocketAsync();
                 var ct = context.RequestAborted;
                 var json = await ReceiveStringAsync(webSocket, ct);
